@@ -20,5 +20,16 @@ export default new Vuex.Store({
     assignRadnomEmployee(state, employee: Employee) {
       state.randomEmployee = {...employee};
     }
+  },
+  getters: {
+    getAllEmployees(state): Employee[] {
+      return state.employees;
+    },
+    getOnlyTenEmployees(state): Employee[] {
+      return state.employees.slice(0,10);
+    },
+    getRandomEmployee(state): Employee {
+      return state.randomEmployee;
+    }
   }
 })
