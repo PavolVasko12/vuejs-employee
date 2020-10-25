@@ -27,11 +27,8 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import Api from '../services/api';
 import { Employee } from '../interfaces/employee.interface';
 import Loading from '../components/Loading.vue';
-import router from '@/router';
-import store from '../store/store';
 import { storeValues } from '../enums/store.enum';
 
 @Component({
@@ -40,30 +37,35 @@ import { storeValues } from '../enums/store.enum';
   }
 })
 export default class HomePage extends Vue {
-
   employees: Employee[] = [];
   loading = true;
   orderBy = '';
 
+
   created(): void {
-    /**
-     * Check whether we already pulled data from API 
-     * If not pull the data, store them in VUEX store
-     */ 
-    if (store.state.employees.length < 1) {
-      Api.getAllEmployees().then(response => {
-        const onlyTenRecord = response.slice(0,10);
-        store.commit(storeValues.ASSIGNE_EMPLOYEES, onlyTenRecord);
-        this.employees = store.state.employees;
-        this.loading = false;
-      }).catch(() => {
-        window.alert('Unexpected error, please refresh the page');
+    if (this.$store.getters.getAllEmployeesLength > 0) {
+        this.initilize();
+    } else {
+      this.$store.dispatch('assignEmployeesFromSession').then(response => {
+        (response) ? this.initilize() : this.apiCall();
+      });
+    }
+  }
+
+  initilize() {
+    this.employees = this.$store.getters.getOnlyTenEmployees(10);
+    this.loading = false;
+  }
+
+  apiCall() {
+    this.$store.dispatch('getAllEmployeesFromApi')
+      .then(() => {
+        this.initilize();
+      })
+      .catch(error => {
+        window.alert(`Unexpected error, please refresh the page: ${error}`);
         this.loading = false;
       });
-    } else {
-      this.loading = false;
-      this.employees = store.state.employees;
-    }
   }
 
   /**
@@ -71,16 +73,15 @@ export default class HomePage extends Vue {
    * @param employee the selected employee
    */
   goToDetailPage = (employee: Employee): void => {
-    store.commit( storeValues.SELECT_EMPLOYEE, employee);
-    router.push({ path: `/detail/${employee.id}`});
+    this.$store.commit(storeValues.SELECT_EMPLOYEE, employee);
+    this.$router.push({ path: `/detail/${employee.id}`});
   }
 
   /**
-   * @description re-order the display data and save it to VUEX store
+   * @description re-order the display data
    */
   onChangeOrderBy(): void {
-    store.commit(storeValues.ASSIGNE_EMPLOYEES, Vue.lodash.orderBy(store.state.employees, this.orderBy));
-    this.employees = store.state.employees;
+    this.employees = Vue.lodash.orderBy(this.employees, this.orderBy);
   }
 }
 </script>

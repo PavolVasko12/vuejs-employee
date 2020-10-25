@@ -1,6 +1,8 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import { Employee } from '../interfaces/employee.interface';
+import axios from 'axios';
+import { api } from '@/enums/api.enum';
 
 Vue.use(Vuex)
 
@@ -21,15 +23,52 @@ export default new Vuex.Store({
       state.randomEmployee = {...employee};
     }
   },
+  actions: {
+    getAllEmployeesFromApi({commit}) {
+      return axios.get(api.GET_EMPLOYEES)
+        .then(result =>  {
+          commit('assigneEmployees', result.data.data);
+          window.sessionStorage.setItem('allEmployees', JSON.stringify(result.data.data));
+        })
+        .catch(error => { 
+          throw new Error(`API ${error}`);
+        });
+    },
+    assignEmployeesFromSession({commit}) {
+      const allEmployees: string | null = window.sessionStorage.getItem('allEmployees');
+      if (typeof allEmployees === 'string') {
+        commit('assigneEmployees', JSON.parse(allEmployees));
+        return true;
+      } else {
+        return false;
+      }
+    }
+  },
   getters: {
     getAllEmployees(state): Employee[] {
       return state.employees;
     },
-    getOnlyTenEmployees(state): Employee[] {
-      return state.employees.slice(0,10);
+    getAllEmployeesLength(state): number {
+      return state.employees.length;
+    },
+    getOnlyTenEmployees: (state) => (size: number): Employee[] => {
+      return state.employees.slice(0, size);
     },
     getRandomEmployee(state): Employee {
       return state.randomEmployee;
+    },
+    getSelectedEmployee(state): Employee {
+      return state.selectedEmployee;
+    },
+    getSelectedEmployeeId(state): number {
+      return state.selectedEmployee.id;
+    },
+    getEmployeeById: (state) => (id: number): Employee => {
+      return state.employees.filter(employee => {
+        if (employee.id === id) {
+          return employee;
+        }
+      })[0]
     }
   }
 })

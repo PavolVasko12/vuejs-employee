@@ -1,33 +1,54 @@
 <template>
   <article>
-    <h1 class="heading">Random Page</h1>
-    <!-- Pass random employee to EmployeeCard component -->
-    <EmployeeCard :employee="store.state.randomEmployee"></EmployeeCard>
-    <button class="button" @click="onClickGenerateNewRandomEmployee()">Random Employee</button>
+    <div v-if="!loading">
+      <h1 class="heading">Random Page</h1>
+      <!-- Pass random employee to EmployeeCard component -->
+      <EmployeeCard :employee="this.$store.getters.getRandomEmployee"></EmployeeCard>
+      <button class="button" @click="onClickGenerateNewRandomEmployee()">Random Employee</button>
+    </div>
+    <div v-else>
+      <Loading></Loading>
+    </div>
   </article>
 </template>
 
 <script lang="ts">
+import { storeValues } from '@/enums/store.enum';
   import { Employee } from '@/interfaces/employee.interface';
   import { Component, Vue } from 'vue-property-decorator';
   import EmployeeCard from '../components/EmployeeCard.vue';
-  import store from '../store/store';
-  import router from '@/router';
+  import Loading from '../components/Loading.vue';
 
 @Component({
   components: {
-    EmployeeCard
+    EmployeeCard,
+    Loading
   }
 })
 export default class HomePage extends Vue {
-  store = store;
+  loading = true;
 
   created(): void {
-    if (store.state.employees.length > 0) {
-      store.state.randomEmployee = this.selectRandomEmployee(this.generateRandomNumberInRange(store.state.employees.length, 0));
+    if (this.$store.getters.getAllEmployeesLength > 0) {
+      this.initilize();
     } else {
-      router.push({ path: "/"});
+      this.$store.dispatch('getAllEmployeesFromApi')
+        .then(() => {
+          this.initilize();
+        })
+        .catch(error => {
+          window.alert(`Unexpected error, please refresh the page: ${error}`);
+          this.loading = false;
+      });
     }
+  }
+
+  initilize(): void {
+    this.$store.commit(
+      storeValues.ASSIGN_RANDOM_EMPLOYEE,
+      this.selectRandomEmployee(this.generateRandomNumberInRange(this.$store.getters.getAllEmployeesLength, 0)) 
+    );
+    this.loading = false;
   }
 
   /**
@@ -44,14 +65,17 @@ export default class HomePage extends Vue {
    * @param number is the specific employee from an array is going to be fetched
    */
   selectRandomEmployee = (number: number): Employee => {
-    return store.state.employees[number];
+    return this.$store.getters.getAllEmployees[number];
   }
 
   /**
    * @description Generate new random employee on click and update store value
    */
   onClickGenerateNewRandomEmployee = (): void => {
-    store.state.randomEmployee = this.selectRandomEmployee(this.generateRandomNumberInRange(store.state.employees.length, 0));
+    this.$store.commit(
+      storeValues.ASSIGN_RANDOM_EMPLOYEE,
+      this.selectRandomEmployee(this.generateRandomNumberInRange(this.$store.getters.getAllEmployeesLength, 0))
+    )
   }
 }
 </script>

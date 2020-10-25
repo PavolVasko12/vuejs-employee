@@ -1,48 +1,78 @@
 <template>
-  <article> 
-    <h1 class="heading">Detail Page</h1>
-    <EmployeeCard :employee="store.state.selectedEmployee"></EmployeeCard>
-    <h3>Relevant employees:</h3>
-    <!-- Relevant empployee loop -->
-    <div class="multiple-employee-card">
-      <EmployeeCard 
-        v-for="employee in randomEmployees" 
-        v-bind:key="employee.id" 
-        :employee=employee
-        :multiple=true>
-      </EmployeeCard>
+  <article>
+    <div v-if="!loading">
+      <h1 class="heading">Detail Page</h1>
+      <EmployeeCard :employee="this.$store.getters.getSelectedEmployee"></EmployeeCard>
+      <h3>Relevant employees:</h3>
+      <!-- Relevant empployee loop -->
+      <div class="multiple-employee-card">
+        <EmployeeCard 
+          v-for="employee in randomEmployees" 
+          v-bind:key="employee.id" 
+          :employee=employee
+          :multiple=true>
+        </EmployeeCard>
+      </div>
+    </div>
+    <div v-else>
+      <Loading></Loading>
     </div>
   </article>
 </template>
 
 <script lang="ts">
+import { storeValues } from '@/enums/store.enum';
   import { Employee } from '@/interfaces/employee.interface';
   import { Component, Vue } from 'vue-property-decorator';
   import EmployeeCard from '../components/EmployeeCard.vue';
-  import store from '../store/store';
-  import router from '@/router';
+  import Loading from '../components/Loading.vue';
 
   @Component({
     components: {
-      EmployeeCard
+      EmployeeCard,
+      Loading
     }
   })
   export default class HomePage extends Vue {
 
-    private store = store;
     private count = 3;
     randomEmployees: Employee[] = [];
+    loading = true;
 
     /**
      * Select a random employee from an array
-     * If we do not have any data store in store, return back to home page
+     * If we do not have any data store in store try to retrive them from the session storage
+     * If session storage empty only then return to home page
      */
     created() {
-      if (store.state.selectedEmployee.id) {
-        this.randomEmployees = this.sliceArray(this.count, this.shuffleArray(this.removeCurrentEmployee(store.state.selectedEmployee.id)));
-      } else {
-        router.push({ path: "/"});
+      if (this.$store.getters.getSelectedEmployeeId) {
+        this.initilize();
+      } 
+      else {
+        this.$store.dispatch('assignEmployeesFromSession');
+        if (this.$store.getters.getAllEmployeesLength > 0) {
+          this.initilize(true);
+        } 
+        else {
+          this.$store.dispatch('getAllEmployeesFromApi')
+          .then(() => {
+            this.initilize(true);
+          })
+          .catch(error => {
+            window.alert(`Unexpected error, please refresh the page: ${error}`);
+            this.loading = false;
+          });
+        }
       }
+    }
+
+
+    initilize(alreadySelected = false): void {
+      if (alreadySelected) {
+        this.$store.commit(storeValues.SELECT_EMPLOYEE, this.$store.getters.getEmployeeById(Number(this.$router.currentRoute.params.id)));
+      }
+      this.randomEmployees = this.sliceArray(this.count, this.shuffleArray(this.removeCurrentEmployee(this.$store.getters.getSelectedEmployeeId)));
+      this.loading = false;
     }
 
 
@@ -52,7 +82,7 @@
      * @returns an arra of all employees apart the currenly selected one
      */
     removeCurrentEmployee = (employeeId: number): Employee[] => {
-      return store.state.employees.filter(employee => {
+      return this.$store.getters.getAllEmployees.filter((employee: Employee) => {
         if (employee.id !== employeeId) {
           return employee;
         }
