@@ -30,17 +30,25 @@
     padding: 0;
   }
 
+  html, body {
+    height: 100%;
+  }
+
   #app {
     font-family: Avenir, Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     color: $primary-color;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
 
     #holder {
       width: 100%;
-      padding: 150px 0;
+      padding: 120px 0;
       max-width: 1000px;
       margin: auto;
+      flex: 1 0 auto;
 
       @media(max-width: 767px) {
         width: calc(100% - 30px);

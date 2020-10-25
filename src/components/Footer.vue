@@ -18,6 +18,7 @@
     width: calc(100% - 30px);
     padding: 10px 15px;
     color: $white;
+    flex-shrink: 0;
 
     #footer-inner {
       max-width: $max-width;
