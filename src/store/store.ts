@@ -3,6 +3,8 @@ import Vuex from 'vuex'
 import { Employee } from '../interfaces/employee.interface';
 import axios from 'axios';
 import { api } from '@/enums/api.enum';
+import { sessionStorage } from '@/enums/session-storage.enum';
+import { storeValues } from '@/enums/store.enum';
 
 Vue.use(Vuex)
 
@@ -27,17 +29,17 @@ export default new Vuex.Store({
     getAllEmployeesFromApi({commit}) {
       return axios.get(api.GET_EMPLOYEES)
         .then(result =>  {
-          commit('assigneEmployees', result.data.data);
-          window.sessionStorage.setItem('allEmployees', JSON.stringify(result.data.data));
+          commit(storeValues.ASSIGNE_EMPLOYEES, result.data.data);
+          window.sessionStorage.setItem(sessionStorage.ALL_EMPLOYEES, JSON.stringify(result.data.data));
         })
         .catch(error => { 
           throw new Error(`API ${error}`);
         });
     },
     assignEmployeesFromSession({commit}) {
-      const allEmployees: string | null = window.sessionStorage.getItem('allEmployees');
+      const allEmployees: string | null = window.sessionStorage.getItem(sessionStorage.ALL_EMPLOYEES);
       if (typeof allEmployees === 'string') {
-        commit('assigneEmployees', JSON.parse(allEmployees));
+        commit(storeValues.ASSIGNE_EMPLOYEES, JSON.parse(allEmployees));
         return true;
       } else {
         return false;

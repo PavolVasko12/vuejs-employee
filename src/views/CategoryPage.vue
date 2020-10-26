@@ -72,7 +72,8 @@
   import { Component, Vue } from 'vue-property-decorator';
   import EmployeeCard from '../components/EmployeeCard.vue';
   import { main } from '../enums/main.enum';
-  import Loading from '../components/Loading.vue'
+  import Loading from '../components/Loading.vue';
+  import { storeValues } from '@/enums/store.enum';
 
   @Component({
     components: {
@@ -90,20 +91,24 @@
     categoryShowing = 'mostPaid';
 
     /**
-     * Fill all the relevant arrays with appropriate data and use only 3 to display
-     * If we do not have any data store in store, return back to home page
+     * @description check whether we have values stored in store, if so then initialize
+     * If not try to check if values saved in session storage
+     * If nothing there then do the API call again and fill initialize
      */
     created() {
       if (this.$store.getters.getAllEmployeesLength > 0) {
-        this.initilize();
+        this.initialize();
       } else {
-        this.$store.dispatch('assignEmployeesFromSession').then(response => {
-          (response) ? this.initilize() : this.apiCall();
+        this.$store.dispatch(storeValues.ASSIGNE_EMPLOYEES_FROM_SESSION).then(response => {
+          (response) ? this.initialize() : this.onGetAllEmployeesFromAPI();
         });
       }
     }
 
-    initilize(): void {
+   /**
+   * @description initialize all neccesery data on start
+   */
+    initialize(): void {
       this.mostPaidEmployees = Vue.lodash.orderBy(this.$store.getters.getAllEmployees, [main.SALARY], [main.DESC]).slice(0,3);
       this.leastPaidEmployees = Vue.lodash.orderBy(this.$store.getters.getAllEmployees, [main.SALARY], [main.ASC]).slice(0,3);
       this.oldestEmployees = Vue.lodash.orderBy(this.$store.getters.getAllEmployees, [main.AGE], [main.DESC]).slice(0,3);
@@ -111,10 +116,14 @@
       this.loading = false;
     }
 
-    apiCall() {
-      this.$store.dispatch('getAllEmployeesFromApi')
+
+   /**
+   * @description dispatch data to store, and wait to the resulr from API, if success then initialize
+   */
+    onGetAllEmployeesFromAPI() {
+      this.$store.dispatch(storeValues.GET_ALL_EMPLOYEES_FROM_API)
         .then(() => {
-          this.initilize();
+          this.initialize();
         })
         .catch(error => {
           window.alert(`Unexpected error, please refresh the page: ${error}`);

@@ -26,7 +26,7 @@
 </template>
 
 <script lang="ts">
-import { storeValues } from '@/enums/store.enum';
+  import { storeValues } from '@/enums/store.enum';
   import { Employee } from '@/interfaces/employee.interface';
   import { Component, Vue } from 'vue-property-decorator';
   import EmployeeCard from '../components/EmployeeCard.vue';
@@ -45,35 +45,27 @@ import { storeValues } from '@/enums/store.enum';
     loading = true;
 
     /**
-     * Select a random employee from an array
-     * If we do not have any data store in store try to retrive them from the session storage
-     * If session storage empty only then return to home page
+     * @description check whether we have values stored in store, if so then initialize
+     * If not try to check if values saved in session storage
+     * If nothing there then do the API call again and fill initialize
      */
     created() {
       if (this.$store.getters.getSelectedEmployeeId) {
-        this.initilize();
-      } 
-      else {
-        this.$store.dispatch('assignEmployeesFromSession');
-        if (this.$store.getters.getAllEmployeesLength > 0) {
-          this.initilize(true);
-        } 
-        else {
-          this.$store.dispatch('getAllEmployeesFromApi')
-          .then(() => {
-            this.initilize(true);
-          })
-          .catch(error => {
-            window.alert(`Unexpected error, please refresh the page: ${error}`);
-            this.loading = false;
-          });
-        }
+        this.initialize();
+      } else {
+        this.$store.dispatch(storeValues.ASSIGNE_EMPLOYEES_FROM_SESSION).then(response => {
+          (response) ? this.initialize(true) : this.getAllEmployeesFromAPI();
+        });
       }
     }
 
 
-    initilize(alreadySelected = false): void {
-      if (alreadySelected) {
+    /**
+     * @description initialize values
+     * @param {*} commitValueToStore if true store the value into the store
+     */
+    initialize(commitValueToStore = false): void {
+      if (commitValueToStore) {
         this.$store.commit(storeValues.SELECT_EMPLOYEE, this.$store.getters.getEmployeeById(Number(this.$router.currentRoute.params.id)));
       }
       this.randomEmployees = this.sliceArray(this.count, this.shuffleArray(this.removeCurrentEmployee(this.$store.getters.getSelectedEmployeeId)));
@@ -112,6 +104,20 @@ import { storeValues } from '@/enums/store.enum';
      */
     sliceArray = (count: number, employees: Employee[]): Employee[] => {
       return employees.slice(0, count);
+    }
+
+   /**
+   * @description dispatch data to store, and wait to the resulr from API, if success then initialize
+   */
+    getAllEmployeesFromAPI() {
+      this.$store.dispatch(storeValues.GET_ALL_EMPLOYEES_FROM_API)
+        .then(() => {
+          this.initialize(true);
+        })
+        .catch(error => {
+          window.alert(`Unexpected error, please refresh the page: ${error}`);
+          this.loading = false;
+        });
     }
 
   }

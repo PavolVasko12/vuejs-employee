@@ -46,30 +46,41 @@ export default class HomePage extends Vue {
   orderBy = '';
 
 
+  /**
+   * @description check whether we have values stored in store, if so then initialize
+   * If not try to check if values saved in session storage
+   * If nothing there then do the API call again and fill initialize
+   */
   created(): void {
     if (this.$store.getters.getAllEmployeesLength > 0) {
         this.initilize();
     } else {
-      this.$store.dispatch('assignEmployeesFromSession').then(response => {
-        (response) ? this.initilize() : this.apiCall();
+      this.$store.dispatch(storeValues.ASSIGNE_EMPLOYEES_FROM_SESSION).then(response => {
+        (response) ? this.initilize() : this.getAllEmployeesFromAPI();
       });
     }
   }
 
+  /**
+   * @description get first ten employees
+   */
   initilize() {
     this.employees = this.$store.getters.getOnlyTenEmployees(10);
     this.loading = false;
   }
 
-  apiCall() {
-    this.$store.dispatch('getAllEmployeesFromApi')
-      .then(() => {
-        this.initilize();
-      })
-      .catch(error => {
-        window.alert(`Unexpected error, please refresh the page: ${error}`);
-        this.loading = false;
-      });
+  /**
+ * @description dispatch data to store, and wait to the resulr from API, if success then initialize
+ */
+  getAllEmployeesFromAPI() {
+  this.$store.dispatch(storeValues.GET_ALL_EMPLOYEES_FROM_API)
+    .then(() => {
+      this.initilize();
+    })
+    .catch(error => {
+      window.alert(`Unexpected error, please refresh the page: ${error}`);
+      this.loading = false;
+    });
   }
 
   /**
