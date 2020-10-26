@@ -2,13 +2,13 @@
   <!-- Add dynamic class deppending on input from parent component -->
   <div :class="multiple ? 'multiple' : 'single'" class="detail-card">
     <div class="detail-card__header">
-      <p><span>Name: </span>{{ employee.employee_name }}</p>
+      <p><span class="detail-card__header__name">Name: </span>{{ employee.employee_name }}</p>
+      <img src="../assets/user.svg" alt="User profile image">
     </div>
     <div class="detail-card__body">
-      <p><span>ID: </span>{{ employee.id }}</p>
-      <p><span>Age: </span>{{ employee.employee_age }}</p>
-      <p><span>Salary: </span>{{ employee.employee_salary }} &euro;</p>
-      <p><span>Profile Image: </span>{{ employee.profile_image }}</p>
+      <p><span class="detail-card__body__id">ID: </span>{{ employee.id }}</p>
+      <p><span class="detail-card__body__age">Age: </span>{{ employee.employee_age }}</p>
+      <p><span class="detail-card__body__salary">Salary: </span>{{ employee.employee_salary }} &euro;</p>
     </div>
   </div>
 </template>
@@ -37,9 +37,38 @@
       padding: 10px 15px;
       border-radius: 5px 5px 0 0;
       font-size: 1.2em;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
 
-      span {
+      p {
+        margin-left: 40px;
+      }
+
+      img {
+        width: 60px;
+        height: auto;
+        border-radius: 50%;
+
+        @media(max-width: 767px) {
+          width: 30px;
+        }
+      }
+
+      &__name {
         font-weight: 600;
+        position: relative;
+
+        &:before {
+          content: "";
+          background: url("../assets/name.svg") no-repeat;
+          background-size: 24px auto;
+          height: 24px;
+          width: 24px;
+          left: -40px;
+          top: 0px;
+          position: absolute;
+        }
       }
     }
 
@@ -48,12 +77,40 @@
       background-color: $light-gray;
       font-size: 1em;
 
-      span {
+      &__id,
+      &__salary,
+      &__age {
         font-weight: 600;
+        position: relative;
+        padding-left: 40px;
+
+        &:before {
+          content: "";
+          background: url("../assets/calendar.svg") no-repeat;
+          background-size: 24px auto;
+          height: 24px;
+          width: 24px;
+          left: 0;
+          top: 0px;
+          position: absolute;
+        }
+      }
+
+      &__salary {
+        &:before {
+          background: url("../assets/money.svg") no-repeat;
+        }
+      }
+
+      &__id {
+        &:before {
+          background: url("../assets/passkey.svg") no-repeat;
+        }
       }
 
       p {
         line-height: 150%;
+        padding: 10px 0;
       }
     }
   }
@@ -63,11 +120,20 @@
     font-size: 0.8em;
 
     .detail-card__header {
-      background-color: $aquamarine;
+      background-color: $coral;
+      
+      img {
+        width: 25px;
+      }
+    }
+
+    .detail-card__body {
+      border-left: 1px dashed $coral;
     }
 
     @media(max-width: 767px) {
       width: 100%;
     }
   }
+
 </style>

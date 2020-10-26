@@ -1,13 +1,18 @@
 <template>
   <article>
     <div v-if="!loading">
-      <h1 class="heading">Detail Page</h1>
+      <div class="heading-holder">
+        <h1 class="heading">Detail Page</h1>
+        <div class="fancy-cards first"></div>
+        <div class="fancy-cards second"></div>
+      </div>
       <EmployeeCard :employee="this.$store.getters.getSelectedEmployee"></EmployeeCard>
       <h3>Relevant employees:</h3>
       <!-- Relevant empployee loop -->
       <div class="multiple-employee-card">
         <EmployeeCard 
-          v-for="employee in randomEmployees" 
+          v-for="(employee, index) in randomEmployees" 
+          v-bind:class="'card-'+index"
           v-bind:key="employee.id" 
           :employee=employee
           :multiple=true>
@@ -116,7 +121,7 @@ import { storeValues } from '@/enums/store.enum';
   @import "../styles/variables.scss";
 
   h3 {
-    border-bottom: 4px solid $aquamarine;
+    border-bottom: 4px solid $coral;
     margin-top: 100px;
   }
 </style>

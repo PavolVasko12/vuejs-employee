@@ -24,6 +24,11 @@ const routes: Array<RouteConfig> = [
     path: '/detail/:id',
     name: 'Detail',
     component: () => import('../views/DetailPage.vue')
+  },
+  {
+    path: '*',
+    name: '404',
+    component: () => import('../views/404.vue')
   }
 ]
 

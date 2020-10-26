@@ -1,10 +1,14 @@
 <template>
   <article>
     <div v-if="!loading">
-      <h1 class="heading">Random Page</h1>
+      <div class="heading-holder">
+        <h1 class="heading">Random Page</h1>
+        <div class="fancy-cards first"></div>
+        <div class="fancy-cards second"></div>
+      </div>
       <!-- Pass random employee to EmployeeCard component -->
       <EmployeeCard :employee="this.$store.getters.getRandomEmployee"></EmployeeCard>
-      <button class="button" @click="onClickGenerateNewRandomEmployee()">Random Employee</button>
+      <button class="button" @click="onClickGenerateNewRandomEmployee()"><span>Random Employee</span></button>
     </div>
     <div v-else>
       <Loading></Loading>

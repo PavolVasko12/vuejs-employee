@@ -4,7 +4,7 @@
       <!-- Dynamically render nav menu items -->
       <ul>
         <li v-for="menuItem in menuItems" v-bind:key="menuItem.id">
-          <router-link class="button" :to="`${menuItem.link}`"> {{ menuItem.title }} </router-link>
+          <router-link v-bind:class="menuItem.title.toLowerCase()" class="button" :to="`${menuItem.link}`"><span>{{ menuItem.title }}</span></router-link>
         </li>
       </ul>
     </nav>
@@ -55,16 +55,18 @@ export default class Navigation extends Vue {
     padding: 10px 0;
     position: fixed;
     display: flex;
-    background-color: $aquamarine;
+    background-color: $coral;
     z-index: 1000;
 
     @media(max-width: 767px) {
-      display: none;
+      display: flex;
+      margin-top: -100vh;
       height: 100vh;
       padding: 0;
       align-items: center;
       justify-content: center;
       text-align: center;
+      transition: 500ms ease-in-out;
     }
 
     ul {
@@ -76,6 +78,17 @@ export default class Navigation extends Vue {
       li {
         display: inline;
         margin: 0 5px;
+        padding: 0;
+
+        a {
+          position: relative;
+          padding: 5px;
+        }
+
+        .router-link-exact-active {
+          color: $coral !important;
+          font-weight: 600;
+        }
 
         &:first-of-type {
           margin-left: 0;
@@ -92,6 +105,7 @@ export default class Navigation extends Vue {
 
   .display {
     display: flex;
+    margin-top: 0;
   }
   
   #toogle-nav {
@@ -120,6 +134,8 @@ export default class Navigation extends Vue {
 
     @media(max-width: 767px) {
       display: block;
+      position: fixed;
+      z-index: 1001;
     }
   }
 </style>
